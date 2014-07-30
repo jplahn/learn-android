@@ -16,6 +16,8 @@ public class CheatActivity extends Activity {
     private boolean mAnswerIsTrue;
     private TextView mAnswerTextView;
     private Button mShowAnswer;
+    private static final String CHEATED = "true";
+    private boolean cheat = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,10 +37,14 @@ public class CheatActivity extends Activity {
                 } else {
                     mAnswerTextView.setText(R.string.false_button);
                 }
-
+                cheat = true;
                 setAnswerShownResult(true);
             }
         });
+
+        if (savedInstanceState != null) {
+            setAnswerShownResult(savedInstanceState.getBoolean(CHEATED, false));
+        }
     }
 
 
@@ -46,6 +52,12 @@ public class CheatActivity extends Activity {
         Intent data = new Intent();
         data.putExtra(EXTRA_ANSWER_SHOWN, isAnswerShown);
         setResult(RESULT_OK, data);
+    }
+
+
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+        savedInstanceState.putBoolean(CHEATED, cheat);
     }
 
 }

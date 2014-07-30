@@ -1,6 +1,8 @@
 package com.example.jplahn.geoquiz;
 
+import android.app.ActionBar;
 import android.content.Intent;
+import android.os.Build;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -22,14 +24,16 @@ public class QuizActivity extends ActionBarActivity {
     private TextView mQuestionTextView;
     //private static final String TAG = "QuizActivity";
     private static final String KEY_INDEX = "index";
+    private static final String CHEATED = "false";
     private boolean mIsCheater;
+    private TextView mVersionText;
 
     private TrueFalse[] mQuestionBank = new TrueFalse[] {
-        new TrueFalse(R.string.question_oceans, true),
-        new TrueFalse(R.string.question_mideast, false),
-        new TrueFalse(R.string.question_africa, false),
-        new TrueFalse(R.string.question_americas, true),
-        new TrueFalse(R.string.question_asia, true),
+        new TrueFalse(R.string.question_oceans, true, false),
+        new TrueFalse(R.string.question_mideast, false, false),
+        new TrueFalse(R.string.question_africa, false, false),
+        new TrueFalse(R.string.question_americas, true, false),
+        new TrueFalse(R.string.question_asia, true, false),
     };
 
     private int mCurrentIndex = 0;
@@ -39,6 +43,10 @@ public class QuizActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         //Log.d(TAG, "onCreate(Bundle) called");
         setContentView(R.layout.activity_quiz);
+
+        mVersionText = (TextView)findViewById(R.id.version_text);
+        String version = Integer.toString(Build.VERSION.SDK_INT);
+        mVersionText.setText(version);
 
         mQuestionTextView = (TextView)findViewById(R.id.question_text_view);
 
@@ -94,6 +102,7 @@ public class QuizActivity extends ActionBarActivity {
 
         if (savedInstanceState != null) {
             mCurrentIndex = savedInstanceState.getInt(KEY_INDEX, 0);
+            mIsCheater = savedInstanceState.getBoolean(CHEATED, false);
         }
         updateQuestion();
     }
@@ -110,11 +119,13 @@ public class QuizActivity extends ActionBarActivity {
 
     private void checkAnswer(boolean userPressedTrue) {
         boolean answerIsTrue = mQuestionBank[mCurrentIndex].isTrueQuestion();
+        TrueFalse question = mQuestionBank[mCurrentIndex];
 
         int messageResId = 0;
 
-        if (mIsCheater) {
+        if (mIsCheater || question.isCheatedQuestion()) {
             messageResId = R.string.judgement_toast;
+            mQuestionBank[mCurrentIndex].setCheatedQuestion(true);
         } else {
             if (userPressedTrue == answerIsTrue) {
                 messageResId = R.string.correct_toast;
@@ -156,6 +167,7 @@ public class QuizActivity extends ActionBarActivity {
         super.onSaveInstanceState(savedInstanceState);
         //Log.i(TAG, "onSavedInstanceState");
         savedInstanceState.putInt(KEY_INDEX, mCurrentIndex);
+        savedInstanceState.putBoolean(CHEATED, mIsCheater);
     }
 
     @Override
